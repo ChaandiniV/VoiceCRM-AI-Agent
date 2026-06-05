@@ -72,7 +72,7 @@ Important: the current voice demo uses the browser microphone, not a real phone 
 
 ![Streamlit Dashboard](docs/images/streamlit-dashboard.png)
 
-Some screenshots are placeholders. Replace them with your real screenshots using the same file names before final submission.
+
 
 ---
 
