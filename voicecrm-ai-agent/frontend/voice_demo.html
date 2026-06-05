@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VoiceCRM Browser Voice Demo</title>
+  <style>
+    :root { font-family: Inter, Arial, sans-serif; color: #172033; background: #f6f7fb; }
+    body { margin: 0; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+    .hero { background: #fff; border-radius: 18px; padding: 28px; box-shadow: 0 10px 28px rgba(23,32,51,.08); }
+    h1 { margin: 0 0 8px; font-size: 34px; }
+    p { color: #526070; line-height: 1.5; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 22px; }
+    .card { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 6px 22px rgba(23,32,51,.06); }
+    label { display: block; font-size: 13px; font-weight: 700; margin: 12px 0 6px; color: #283447; }
+    input, textarea, select { width: 100%; box-sizing: border-box; padding: 11px 12px; border: 1px solid #d9deea; border-radius: 10px; font-size: 15px; background: #fff; }
+    textarea { min-height: 150px; resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    button { border: 0; border-radius: 12px; padding: 12px 16px; font-weight: 800; cursor: pointer; margin: 8px 8px 0 0; }
+    .primary { background: #111827; color: white; }
+    .secondary { background: #e9edf5; color: #172033; }
+    .danger { background: #fee2e2; color: #991b1b; }
+    .success { background: #dcfce7; color: #166534; }
+    .status { display: inline-block; margin-top: 12px; padding: 8px 10px; border-radius: 10px; background: #eef2ff; color: #3730a3; font-size: 13px; }
+    pre { white-space: pre-wrap; word-break: break-word; background: #0b1020; color: #d7e4ff; border-radius: 14px; padding: 16px; min-height: 220px; overflow:auto; }
+    .small { font-size: 13px; color: #697586; }
+    .metric { display: inline-block; margin: 6px 8px 6px 0; padding: 10px 12px; background: #f2f5fa; border-radius: 12px; }
+    @media (max-width: 850px) { .grid, .row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <h1>VoiceCRM AI Agent — Browser Voice Demo</h1>
+      <p>
+        This is the free voice layer: speak into your laptop microphone, convert speech to text in the browser,
+        send the transcript to FastAPI, qualify the lead, trigger Make, and hear the agent reply using browser text-to-speech.
+      </p>
+      <span class="status" id="supportStatus">Checking microphone speech support...</span>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h2>Caller Details</h2>
+        <div class="row">
+          <div>
+            <label>Customer name</label>
+            <input id="customer_name" value="Aisha Khan" />
+          </div>
+          <div>
+            <label>Phone</label>
+            <input id="phone" value="+971501112233" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Email</label>
+            <input id="email" value="aisha@example.com" />
+          </div>
+          <div>
+            <label>Company</label>
+            <input id="company" value="Palm Clinic" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Industry</label>
+            <input id="industry" value="Healthcare" />
+          </div>
+          <div>
+            <label>Preferred follow-up</label>
+            <input id="preferred_channel" value="WhatsApp follow-up" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Budget</label>
+            <input id="budget" value="12000 AED monthly" />
+          </div>
+          <div>
+            <label>Timeline</label>
+            <input id="timeline" value="Go live in 3 weeks" />
+          </div>
+        </div>
+
+        <h2>Voice Intake</h2>
+        <p class="small">Click Start, speak the customer requirement, then click Send to AI Qualification.</p>
+        <button class="primary" id="startBtn">🎙️ Start listening</button>
+        <button class="danger" id="stopBtn">Stop</button>
+        <button class="secondary" id="speakPromptBtn">🔊 Speak agent prompt</button>
+        <button class="success" id="sendBtn">Send to AI Qualification</button>
+        <label>Captured transcript</label>
+        <textarea id="spoken_transcript">We need an AI voice assistant to handle appointment booking, FAQs, and lead capture for new patients.</textarea>
+      </div>
+
+      <div class="card">
+        <h2>AI Result</h2>
+        <div id="metrics"></div>
+        <label>Agent reply</label>
+        <textarea id="agent_reply" readonly></textarea>
+        <button class="secondary" id="speakReplyBtn">🔊 Speak reply</button>
+        <h3>Raw API response</h3>
+        <pre id="result">No result yet.</pre>
+      </div>
+    </section>
+  </main>
+
+<script>
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const supportStatus = document.getElementById('supportStatus');
+  const transcriptBox = document.getElementById('spoken_transcript');
+  const resultBox = document.getElementById('result');
+  const agentReplyBox = document.getElementById('agent_reply');
+  const metrics = document.getElementById('metrics');
+  let recognition = null;
+
+  function speak(text) {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  if (!SpeechRecognition) {
+    supportStatus.textContent = 'Speech recognition is not supported in this browser. Use Chrome or Edge on localhost.';
+    supportStatus.style.background = '#fee2e2';
+    supportStatus.style.color = '#991b1b';
+  } else {
+    supportStatus.textContent = 'Ready. Browser speech-to-text works best in Chrome or Edge on localhost.';
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = true;
+    recognition.continuous = true;
+
+    let finalTranscript = '';
+    recognition.onresult = (event) => {
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const text = event.results[i][0].transcript;
+        if (event.results[i].isFinal) finalTranscript += text + ' ';
+        else interim += text;
+      }
+      transcriptBox.value = (finalTranscript + interim).trim();
+    };
+    recognition.onstart = () => { supportStatus.textContent = 'Listening... speak now.'; };
+    recognition.onend = () => { supportStatus.textContent = 'Stopped listening. You can edit the transcript before sending.'; };
+    recognition.onerror = (event) => { supportStatus.textContent = 'Speech error: ' + event.error; };
+
+    document.getElementById('startBtn').onclick = () => {
+      finalTranscript = '';
+      transcriptBox.value = '';
+      recognition.start();
+    };
+    document.getElementById('stopBtn').onclick = () => recognition.stop();
+  }
+
+  document.getElementById('speakPromptBtn').onclick = () => {
+    speak('Hello, this is the VoiceCRM AI assistant. Please describe what you need help with today.');
+  };
+
+  document.getElementById('speakReplyBtn').onclick = () => {
+    if (agentReplyBox.value) speak(agentReplyBox.value);
+  };
+
+  document.getElementById('sendBtn').onclick = async () => {
+    const payload = {
+      customer_name: document.getElementById('customer_name').value || 'Website Caller',
+      phone: document.getElementById('phone').value || 'browser-demo',
+      email: document.getElementById('email').value || null,
+      company: document.getElementById('company').value || null,
+      industry: document.getElementById('industry').value || 'General Services',
+      spoken_transcript: transcriptBox.value,
+      budget: document.getElementById('budget').value || null,
+      timeline: document.getElementById('timeline').value || null,
+      preferred_channel: document.getElementById('preferred_channel').value || 'Email'
+    };
+
+    resultBox.textContent = 'Sending transcript to FastAPI...';
+    const response = await fetch('/api/voice/browser-lead', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      resultBox.textContent = JSON.stringify(data, null, 2);
+      return;
+    }
+
+    agentReplyBox.value = data.agent_reply;
+    metrics.innerHTML = `
+      <span class="metric"><b>Lead ID:</b> ${data.lead_id}</span>
+      <span class="metric"><b>Score:</b> ${data.lead_score.score}</span>
+      <span class="metric"><b>Priority:</b> ${data.lead_score.priority}</span>
+      <span class="metric"><b>Make:</b> ${data.automation_status}</span>
+    `;
+    resultBox.textContent = JSON.stringify(data, null, 2);
+    speak(data.agent_reply);
+  };
+</script>
+</body>
+</html>

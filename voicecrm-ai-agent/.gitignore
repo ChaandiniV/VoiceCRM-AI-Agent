@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+*.db
+*.sqlite
+.DS_Store
+.pytest_cache/
+.streamlit/
+data/*outbox*.jsonl
+data/voicecrm.db

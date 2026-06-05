@@ -1,0 +1,40 @@
+{
+  "event_type": "qualified_voice_lead",
+  "source": "voicecrm_ai_agent",
+  "call_id": 1,
+  "lead_id": 1,
+  "customer_name": "Aisha Khan",
+  "phone": "+971501112233",
+  "email": "aisha@example.com",
+  "company": "Palm Clinic",
+  "industry": "Healthcare",
+  "requirement": "We need an AI voice assistant to handle appointment booking, FAQs, and lead capture for new patients.",
+  "budget": "12000 AED monthly",
+  "timeline": "Go live in 3 weeks",
+  "preferred_channel": "WhatsApp follow-up",
+  "lead_score": 90,
+  "priority": "High",
+  "next_action": "Book technical discovery call and prepare vertical-specific POC.",
+  "reasons": [
+    "Clear business requirement captured",
+    "Use case is suitable for voice AI automation",
+    "Budget signal provided",
+    "Timeline suggests active buying intent",
+    "Follow-up channel is defined"
+  ],
+  "implementation_summary": {
+    "vertical": "Healthcare",
+    "workflow": "Appointment booking and FAQ automation",
+    "integrations_needed": [
+      "Voice telephony webhook",
+      "CRM contact/deal creation",
+      "WhatsApp Business follow-up",
+      "Calendar or booking system API"
+    ],
+    "estimated_complexity": "Medium",
+    "recommended_poc": "Build a 5-minute Healthcare demo where the caller asks questions, shares contact details, receives next-step confirmation, and the lead appears in CRM."
+  },
+  "crm_mode": "mock",
+  "crm_status": "created",
+  "crm_record_id": "mock-1234567"
+}

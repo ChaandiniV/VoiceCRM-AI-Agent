@@ -1,0 +1,24 @@
+[
+  {
+    "customer_name": "Aisha Khan",
+    "phone": "+971501112233",
+    "email": "aisha@example.com",
+    "company": "Palm Clinic",
+    "industry": "Healthcare",
+    "requirement": "We need an AI voice assistant to handle appointment booking, FAQs, and lead capture for new patients.",
+    "budget": "12000 AED monthly",
+    "timeline": "Go live in 3 weeks",
+    "preferred_channel": "WhatsApp follow-up"
+  },
+  {
+    "customer_name": "Omar Nasser",
+    "phone": "+971502223344",
+    "email": "omar@example.com",
+    "company": "Nasser Properties",
+    "industry": "Real Estate",
+    "requirement": "We want a voice agent to qualify property buyer leads and send hot leads to CRM.",
+    "budget": "8000 AED monthly",
+    "timeline": "Within one month",
+    "preferred_channel": "CRM and email follow-up"
+  }
+]
